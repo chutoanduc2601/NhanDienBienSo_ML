@@ -14,7 +14,7 @@ plate_model = YOLO('license_plate_detector.pt')  # Phát hiện biển số
 ocr_reader = easyocr.Reader(['en'])  # OCR tiếng Anh
 
 # Đọc ảnh
-img = cv2.imread('dataset/anh1.jpg')
+img = cv2.imread('CarTGMT/AQUA2_29C80581_checkin_2020-11-2-16-48xYZYW2rma8.jpg')
 vehicles = [2, 3, 5, 7]  # car, motorcycle, bus, truck
 
 # Phát hiện phương tiện
