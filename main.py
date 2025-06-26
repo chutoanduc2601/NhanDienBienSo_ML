@@ -6,7 +6,7 @@ import os
 # from crnn_model import CRNNRecognizer
 
 # Tạo thư mục nếu chưa có
-os.makedirs('images', exist_ok=True)
+os.makedirs('images_result', exist_ok=True)
 
 # Khởi tạo mô hình
 coco_model = YOLO('yolov8s.pt')  # Phát hiện phương tiện
@@ -14,7 +14,7 @@ plate_model = YOLO('license_plate_detector.pt')  # Phát hiện biển số
 ocr_reader = easyocr.Reader(['en'])  # OCR tiếng Anh
 
 # Đọc ảnh
-img = cv2.imread('CarTGMT/AQUA2_29C80581_checkin_2020-11-2-16-48xYZYW2rma8.jpg')
+img = cv2.imread('CarTGMT/AQUA2_20E14A99_checkin_2020-11-2-7-47vlcTbUNO_t.jpg')
 vehicles = [2, 3, 5, 7]  # car, motorcycle, bus, truck
 
 # Phát hiện phương tiện
@@ -84,10 +84,10 @@ for i, det in enumerate(plate_detections.boxes.data.tolist()):
 
     # Hiển thị và lưu ảnh threshold
     cv2.imshow(f'Thresh Plate {i}', thresh)
-    cv2.imwrite(f'images/thresh_plate_{i}.png', thresh)
+    cv2.imwrite(f'images_result/thresh_plate_{i}.png', thresh)
 
 # Lưu ảnh kết quả
-cv2.imwrite('images/result_detected.png', img)
+cv2.imwrite('images_result/result_detected.png', img)
 
 # Hiển thị ảnh kết quả
 cv2.imshow('Detected Image', img)
