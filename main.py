@@ -88,6 +88,45 @@ for i, det in enumerate(plate_detections.boxes.data.tolist()):
 
 # Lưu ảnh kết quả
 cv2.imwrite('images_result/result_detected.png', img)
+# Mã tỉnh và tên tương ứng
+province_codes = {
+    "11": "Cao Bằng", "12": "Lạng Sơn", "14": "Quảng Ninh", "15": "Hải Phòng",
+    "16": "Hải Phòng", "17": "Thái Bình", "18": "Nam Định", "19": "Phú Thọ",
+    "20": "Thái Nguyên", "21": "Yên Bái", "22": "Tuyên Quang", "23": "Hà Giang",
+    "24": "Lào Cai", "25": "Lai Châu", "26": "Sơn La", "27": "Điện Biên",
+    "28": "Hòa Bình", "29": "Hà Nội", "30": "Hà Nội", "31": "Hà Nội", "32": "Hà Nội",
+    "33": "Hà Nội", "34": "Hải Dương", "35": "Ninh Bình", "36": "Thanh Hóa",
+    "37": "Nghệ An", "38": "Hà Tĩnh", "43": "Đà Nẵng", "47": "Đắk Lắk",
+    "48": "Đắk Nông", "49": "Lâm Đồng", "50": "TP.HCM", "51": "TP.HCM",
+    "52": "TP.HCM", "53": "TP.HCM", "54": "TP.HCM", "55": "TP.HCM", "56": "TP.HCM",
+    "57": "TP.HCM", "58": "TP.HCM", "59": "TP.HCM", "60": "Đồng Nai", "61": "Bình Dương",
+    "62": "Long An", "63": "Tiền Giang", "64": "Vĩnh Long", "65": "Cần Thơ",
+    "66": "Đồng Tháp", "67": "An Giang", "68": "Kiên Giang", "69": "Cà Mau",
+    "70": "Tây Ninh", "71": "Bến Tre", "72": "Bà Rịa - Vũng Tàu", "73": "Quảng Bình",
+    "74": "Quảng Trị", "75": "Thừa Thiên Huế", "76": "Quảng Ngãi", "77": "Bình Định",
+    "78": "Phú Yên", "79": "Khánh Hòa", "80": "Cơ quan TW", "81": "Gia Lai",
+    "82": "Kon Tum", "83": "Sóc Trăng", "84": "Trà Vinh", "85": "Ninh Thuận",
+    "86": "Bình Thuận", "88": "Vĩnh Phúc", "89": "Hưng Yên", "90": "Hà Nam",
+    "92": "Quảng Nam", "93": "Bình Phước", "94": "Bạc Liêu", "95": "Hậu Giang",
+    "97": "Bắc Kạn", "98": "Bắc Giang", "99": "Bắc Ninh"
+}
+
+# Làm sạch văn bản: bỏ ksi tự khong hop le
+plate_text = plate_text.replace('\n', ' ').replace('  ', ' ').strip()
+
+# Tách 2 chữ số đầu để tra tỉnh
+plate_code = plate_text.strip().replace(" ", "").replace("-", "")
+province_name = "Không xác định"
+if len(plate_code) >= 2:
+    code_prefix = plate_code[:2]
+    province_name = province_codes.get(code_prefix, "Không rõ")
+
+# In ra kết quả
+print(f"Biển số: {plate_text} - Tỉnh/TP: {province_name}")
+
+# Hiển thị tên tỉnh lên ảnh
+cv2.putText(img, province_name, (int(x1), int(y2) + 30),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 165, 255), 2)
 
 # Hiển thị ảnh kết quả
 cv2.imshow('Detected Image', img)
