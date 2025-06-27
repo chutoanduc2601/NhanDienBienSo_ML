@@ -4,7 +4,7 @@ import random
 from pathlib import Path
 
 # === Cấu hình đường dẫn gốc ===
-root_dir = Path("D:/HocMay/dataset")
+root_dir = Path("/dataset_yolov8")
 image_dir = root_dir / "image"
 label_dir = root_dir / "labels"
 
@@ -48,4 +48,4 @@ for split, items in split_data.items():
         shutil.copy(image_dir / img_name, root_dir / split / "images" / img_name)
         shutil.copy(label_dir / label_name, root_dir / split / "labels" / label_name)
 
-print("✅ Hoàn tất chia dataset thành train/val/test.")
+print("✅ Hoàn tất chia dataset_yolov8 thành train/val/test.")

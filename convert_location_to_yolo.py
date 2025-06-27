@@ -1,10 +1,10 @@
 import os
 
 # Đường dẫn file location.txt
-location_file = 'dataset/location.txt'
+location_file = 'dataset_yolov8/location.txt'
 
 # Thư mục lưu nhãn sau khi tách
-label_output_dir = 'dataset/labels'
+label_output_dir = 'dataset_yolov8/labels'
 os.makedirs(label_output_dir, exist_ok=True)
 
 # Đọc file location.txt

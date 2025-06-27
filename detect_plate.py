@@ -7,7 +7,7 @@ import cv2
 model = YOLO(r'D:\nhandienphuongtienvabiensoxe\runs\detect\lp_yolov8_training11\weights\best.pt')
 
 # Ảnh test
-img_path = r'D:\HocMay\dataset\images_test\image5.jpg'
+img_path = r'/dataset_yolov8\images_test\image5.jpg'
 results = model(img_path, conf=0.25)
 
 # Hiển thị kết quả

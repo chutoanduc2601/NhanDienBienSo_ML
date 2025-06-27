@@ -10,7 +10,7 @@ num_classes = len(alphabet) + 1  # +1 cho ký tự blank
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Dataset
-train_dataset = CRNNDataset("../dataset/images_test/labels.txt", "dataset/images_test", alphabet)
+train_dataset = CRNNDataset("../dataset_yolov8/images_test/labels.txt", "dataset_yolov8/images_test", alphabet)
 
 
 def my_collate_fn(batch):

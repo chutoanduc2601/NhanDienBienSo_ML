@@ -2,10 +2,10 @@ import os
 ################################
 # Cho label id về 0 trước khi train
 #############################################
-label_root = './dataset/labels'  # Chỉnh đúng nếu nhãn gốc nằm ở đây
+label_root = './dataset_yolov8/labels'  # Chỉnh đúng nếu nhãn gốc nằm ở đây
 
 for split in ['train', 'val', 'test']:
-    label_dir = os.path.join('dataset', split, 'labels')
+    label_dir = os.path.join('dataset_yolov8', split, 'labels')
     for fname in os.listdir(label_dir):
         if fname.endswith('.txt'):
             path = os.path.join(label_dir, fname)
@@ -17,7 +17,7 @@ for split in ['train', 'val', 'test']:
                     if parts:
                         parts[0] = '0'  # Gán class_id = 0
                         f.write(' '.join(parts) + '\n')
-cache_file = "dataset/train/labels.cache"
+cache_file = "dataset_yolov8/train/labels.cache"
 if os.path.exists(cache_file):
     os.remove(cache_file)
     print(f"🗑️ Đã xoá {cache_file}")

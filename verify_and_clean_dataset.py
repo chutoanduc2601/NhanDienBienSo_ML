@@ -3,7 +3,7 @@ import os
 #Kiểm tra nhãn và hình có khớp không
 ########################################################
 sets = ['train', 'val', 'test']
-base_dir = 'dataset'
+base_dir = 'dataset_yolov8'
 
 for s in sets:
     image_dir = os.path.join(base_dir, s, 'images')

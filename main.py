@@ -15,7 +15,7 @@ plate_model = YOLO('./models/best.pt')  # Sử dụng model đã huấn luyện
 ocr_reader = easyocr.Reader(['en'])  # OCR tiếng Anh
 
 # Đọc ảnh
-img = cv2.imread('./dataset/images_test/image11.jpg')
+img = cv2.imread('dataset_yolov8/images_test/image11.jpg')
 vehicles = [2, 3, 5, 7]  # car, motorcycle, bus, truck
 
 # Phát hiện phương tiện
