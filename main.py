@@ -15,7 +15,7 @@ plate_model = YOLO('./models/best.pt')  # Sử dụng model đã huấn luyện
 ocr_reader = easyocr.Reader(['en'])  # OCR tiếng Anh
 
 # Đọc ảnh
-img = cv2.imread('GreenParking/0000_00532_b.jpg')
+img = cv2.imread('./dataset/images_test/image11.jpg')
 vehicles = [2, 3, 5, 7]  # car, motorcycle, bus, truck
 
 # Phát hiện phương tiện
@@ -33,49 +33,115 @@ for i, det in enumerate(plate_detections.boxes.data.tolist()):
     # Cắt ảnh biển số
     plate_crop = img[int(y1):int(y2), int(x1):int(x2)]
 
-    # Sua phan nay
+    # # Chuyển sang ảnh xám
+    # gray = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2GRAY)
+    #
+    # # Cân bằng sáng với CLAHE
+    # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    # gray = clahe.apply(gray)
+    #
+    # # Làm mịn để giảm nhiễu nhưng giữ cạnh ký tự
+    # blur = cv2.bilateralFilter(gray, 11, 17, 17)
+    #
+    # # Dùng Otsu threshold để chọn ngưỡng phù hợp
+    # _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    #
+    # # Loại bỏ các vùng nhiễu nhỏ
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    # thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    #
+    # # Phóng to để OCR dễ đọc hơn
+    # thresh = cv2.resize(thresh, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
+    #
+    # #############################################################
+    # # OCR từng nửa ảnh (2 dòng)
+    # h, w = thresh.shape
+    # upper_half = thresh[0:int(h / 2), :]
+    # lower_half = thresh[int(h / 2):, :]
+    #
+    # upper_text = ocr_reader.readtext(upper_half, detail=0)
+    # lower_text = ocr_reader.readtext(lower_half, detail=0)
+    #
+    # # Ghép kết quả từng nửa
+    # plate_text = ''
+    # if upper_text:
+    #     plate_text += ' '.join([t.strip() for t in upper_text])
+    # if lower_text:
+    #     plate_text += ' ' + ' '.join([t.strip() for t in lower_text])
+    #
+    # # Nếu quá ngắn (chỉ có 1 dòng, không đầy đủ), thử lại toàn biển
+    # if len(plate_text.replace(" ", "")) < 6:
+    #     fallback_text = ocr_reader.readtext(thresh, detail=0)
+    #     if fallback_text:
+    #         plate_text = ' '.join([t.strip() for t in fallback_text])
+    def get_best_rotation_ocr(image, ocr_reader):
+        angles = [0, 90, 180, 270]
+        best_text = ''
+        best_thresh = None
 
-    # Chuyển sang ảnh xám
-    gray = cv2.cvtColor(plate_crop, cv2.COLOR_BGR2GRAY)
+        for angle in angles:
+            rotated = image.copy()
+            if angle != 0:
+                rot_code = {
+                    90: cv2.ROTATE_90_CLOCKWISE,
+                    180: cv2.ROTATE_180,
+                    270: cv2.ROTATE_90_COUNTERCLOCKWISE
+                }[angle]
+                rotated = cv2.rotate(rotated, rot_code)
 
-    # Cân bằng sáng với CLAHE
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    gray = clahe.apply(gray)
+            # Chuyển xám và CLAHE để làm rõ chi tiết
+            gray = cv2.cvtColor(rotated, cv2.COLOR_BGR2GRAY)
+            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+            gray = clahe.apply(gray)
 
-    # Làm mịn để giảm nhiễu nhưng giữ cạnh ký tự
-    blur = cv2.bilateralFilter(gray, 11, 17, 17)
+            # Làm mịn và phân ngưỡng
+            blur = cv2.bilateralFilter(gray, 11, 17, 17)
+            _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-    # Dùng Otsu threshold để chọn ngưỡng phù hợp
-    _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            # Khử nhiễu
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+            thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+            thresh = cv2.resize(thresh, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
 
-    # Loại bỏ các vùng nhiễu nhỏ
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+            texts = ocr_reader.readtext(thresh, detail=0)
+            clean = ' '.join(texts).upper().replace("\n", " ").replace("–", "-").replace("_", "-").replace("|",
+                                                                                                           "1").strip()
 
-    # Phóng to để OCR dễ đọc hơn
-    thresh = cv2.resize(thresh, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
+            if len(clean.replace(" ", "")) > len(best_text.replace(" ", "")):
+                best_text = clean
+                best_thresh = thresh
 
-    #############################################################
-    # OCR từng nửa ảnh (2 dòng)
-    h, w = thresh.shape
-    upper_half = thresh[0:int(h / 2), :]
-    lower_half = thresh[int(h / 2):, :]
+        return best_text, best_thresh
 
-    upper_text = ocr_reader.readtext(upper_half, detail=0)
-    lower_text = ocr_reader.readtext(lower_half, detail=0)
 
-    # Ghép kết quả từng nửa
-    plate_text = ''
-    if upper_text:
-        plate_text += ' '.join([t.strip() for t in upper_text])
-    if lower_text:
-        plate_text += ' ' + ' '.join([t.strip() for t in lower_text])
 
-    # Nếu quá ngắn (chỉ có 1 dòng, không đầy đủ), thử lại toàn biển
-    if len(plate_text.replace(" ", "")) < 6:
-        fallback_text = ocr_reader.readtext(thresh, detail=0)
-        if fallback_text:
-            plate_text = ' '.join([t.strip() for t in fallback_text])
+
+    # Ghép và làm sạch văn bản
+    # Thử xoay và OCR để chọn kết quả tốt nhất
+    plate_text, thresh = get_best_rotation_ocr(plate_crop, ocr_reader)
+
+    plate_text = plate_text.replace('\n', ' ').replace("–", "-").replace("_", "-").replace("|", "1").replace('  ', ' ').strip()
+
+    # Sửa các lỗi OCR thường gặp
+    replacements = {
+        "O": "0", "I": "1", "|": "1", "L": "1",
+        "Z": "2", "A": "4", "B": "8", "G": "6", "S": "5", "T": "7",
+        "5T": "57", "S7": "57", "8O": "80", "B0": "80",
+    }
+    for wrong, right in replacements.items():
+        plate_text = plate_text.replace(wrong, right)
+
+    # Format lại: chuẩn hóa thành dạng XX-XXX.XX
+    # Làm sạch ký tự
+    raw_plate = plate_text.replace(" ", "").replace("-", "").replace(".", "")
+
+    # Định dạng lại theo dạng XX-XX XXX.XX
+    if len(raw_plate) >= 9:
+        # VD: 59F168955 -> 59-F1 689.55
+        plate_text = f"{raw_plate[:2]}-{raw_plate[2:4]} {raw_plate[4:7]}.{raw_plate[7:9]}"
+    else:
+        # fallback nếu không đủ ký tự
+        plate_text = raw_plate
 
     # Làm sạch văn bản: bỏ ký tự thừa
     plate_text = plate_text.replace('\n', ' ').replace('  ', ' ').strip()
@@ -120,13 +186,19 @@ province_codes = {
 
 # Làm sạch văn bản: bỏ ksi tự khong hop le
 plate_text = plate_text.replace('\n', ' ').replace('  ', ' ').strip()
+if len(plate_text.replace(" ", "")) < 7:
+    full_ocr = ocr_reader.readtext(plate_crop, detail=0)
+    if full_ocr:
+        alt_text = ' '.join(full_ocr).upper()
+        if len(alt_text.replace(" ", "")) > len(plate_text.replace(" ", "")):
+            plate_text = alt_text
 
 # Tách 2 chữ số đầu để tra tỉnh
 plate_code = plate_text.strip().replace(" ", "").replace("-", "")
 province_name = "Không xác định"
 if len(plate_code) >= 2:
     code_prefix = plate_code[:2]
-    province_name = province_codes.get(code_prefix, "Không rõ")
+    province_name = province_codes.get(code_prefix, "Khong ro")
 
 # In ra kết quả
 print(f"Biển số: {plate_text} - Tỉnh/TP: {province_name}")

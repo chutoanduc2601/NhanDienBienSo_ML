@@ -1,5 +1,7 @@
 import os
-
+######################
+#Kiểm tra nhãn và hình có khớp không
+########################################################
 sets = ['train', 'val', 'test']
 base_dir = 'dataset'
 
@@ -17,8 +19,8 @@ for s in sets:
     missing_images = label_basenames - image_basenames
 
     if missing_labels:
-        print(f"⚠️ {s}: Thiếu label cho các ảnh: {missing_labels}")
+        print(f"{s}: Thiếu label cho các ảnh: {missing_labels}")
     if missing_images:
-        print(f"⚠️ {s}: Thiếu ảnh cho các label: {missing_images}")
+        print(f"{s}: Thiếu ảnh cho các label: {missing_images}")
 
-print("✅ Kiểm tra xong. Đảm bảo ảnh và nhãn khớp nhau.")
+print("Kiểm tra xong. Đảm bảo ảnh và nhãn khớp nhau.")

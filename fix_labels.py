@@ -1,5 +1,7 @@
 import os
-
+################################
+# Cho label id về 0 trước khi train
+#############################################
 label_root = './dataset/labels'  # Chỉnh đúng nếu nhãn gốc nằm ở đây
 
 for split in ['train', 'val', 'test']:

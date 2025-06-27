@@ -1,6 +1,8 @@
 import cv2
 import os
-
+#####
+# Kiểm tra hình và nhãn có khớp với nhau hay không
+##########################################################
 # Cấu hình
 image_path = "0000_00532_b_jpg.rf.4ee48829fc2d3d1172462159643a2e6d.jpg"  # đường dẫn ảnh
 label_path = "0000_00532_b_jpg.rf.4ee48829fc2d3d1172462159643a2e6d.txt"  # file nhãn YOLO tương ứng
