@@ -9,8 +9,9 @@ import os
 os.makedirs('images_result', exist_ok=True)
 
 # Khởi tạo mô hình
-coco_model = YOLO('yolov8s.pt')  # Phát hiện phương tiện
-plate_model = YOLO('license_plate_detector.pt')  # Phát hiện biển số
+coco_model = YOLO('models/yolov8s.pt')  # Phát hiện phương tiện
+# plate_model = YOLO('license_plate_detector.pt')  # Phát hiện biển số
+plate_model = YOLO('./models/best.pt')  # Sử dụng model đã huấn luyện
 ocr_reader = easyocr.Reader(['en'])  # OCR tiếng Anh
 
 # Đọc ảnh
@@ -55,23 +56,29 @@ for i, det in enumerate(plate_detections.boxes.data.tolist()):
     thresh = cv2.resize(thresh, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
 
     #############################################################
-    # Cắt làm 2 phần để đọc 2 dòng
+    # OCR từng nửa ảnh (2 dòng)
     h, w = thresh.shape
-    upper_half = thresh[0:int(h/2), :]
-    lower_half = thresh[int(h/2):, :]
-
-#############################################
+    upper_half = thresh[0:int(h / 2), :]
+    lower_half = thresh[int(h / 2):, :]
 
     upper_text = ocr_reader.readtext(upper_half, detail=0)
     lower_text = ocr_reader.readtext(lower_half, detail=0)
 
-#############
-    # Ghép tất cả kết quả mỗi dòng
+    # Ghép kết quả từng nửa
     plate_text = ''
     if upper_text:
         plate_text += ' '.join([t.strip() for t in upper_text])
     if lower_text:
         plate_text += ' ' + ' '.join([t.strip() for t in lower_text])
+
+    # Nếu quá ngắn (chỉ có 1 dòng, không đầy đủ), thử lại toàn biển
+    if len(plate_text.replace(" ", "")) < 6:
+        fallback_text = ocr_reader.readtext(thresh, detail=0)
+        if fallback_text:
+            plate_text = ' '.join([t.strip() for t in fallback_text])
+
+    # Làm sạch văn bản: bỏ ký tự thừa
+    plate_text = plate_text.replace('\n', ' ').replace('  ', ' ').strip()
 
     # Làm sạch văn bản: bỏ ký tự không hợp lệ, chuẩn hóa cách viết
     plate_text = plate_text.replace('\n', ' ').replace('  ', ' ').strip()
